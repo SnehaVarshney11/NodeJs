@@ -1,3 +1,21 @@
+const express = require('express');
+const app = express()
+
+app.get('/', function(req, res) {
+    res.send('Hello World!')
+})
+
+app.get('/sneha', function(req, res) {
+    res.send("Hi I am Sneha");
+})
+
+app.listen(3000)
+
+
+
+
+/*
+-------------DEMO--------------------------
 var fs = require('fs');
 var os = require('os');
 
@@ -17,3 +35,4 @@ var _ = require('lodash');
 var arr = ["A", "A", "B", 1, 2, 1, 3, 1, 2];
 var filteredArr = _.uniq(arr)
 console.log("Filtered array " + filteredArr);
+*/
