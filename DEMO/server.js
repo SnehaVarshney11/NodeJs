@@ -9,6 +9,7 @@ app.use(bodyParser.json()); //store in req.body
 
 const personRoutes = require('./routes/personRoutes.js')
 const menuRoutes = require('./routes/menuRoutes.js')
+const milkRoutes = require('./routes/milkRoutes.js')
 
 app.get('/', function(req, res) {
     res.send('Hello World!')
@@ -20,6 +21,7 @@ app.get('/sneha', function(req, res) {
 
 app.use('/person', personRoutes);
 app.use('/menu', menuRoutes);
+app.use('/milk', milkRoutes);
 
 app.listen(3000, ()=> {
     console.log('Server is running on port 3000');
