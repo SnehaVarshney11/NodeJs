@@ -1,32 +1,45 @@
-// Responsible for db connection 
-const mongoose = require('mongoose');
-require('dotenv').config();
+const mongoose = require("mongoose");
+mongoose.Promise = global.Promise;
 
-//Define MongoDb url
-//const mongoUrl = 'mongodb://localhost:27017/hotels';
-const mongoUrl = process.env.DB_URL;
+mongoose.set('strictQuery', true);
 
-//Set up MongoDB connection
-mongoose.connect(mongoUrl, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
-})
+const mongoUrl = 'mongodb://localhost:27017/hotels';
 
-//Get default connect
-const db = mongoose.connection;
+let isConnected;
 
-//Add event Listener for db connection
-db.on('connected', () => {
-    console.log('Connected to MongoDB server');
-});
+module.exports.connectToDatabase = async () => {
+  if (isConnected) {
+    return Promise.resolve();
+  }
+  mongoose.connection.on('connected', () => {
+    console.log('MongoDB database connection established successfully');
+  });
 
-db.on('error', (err) => {
-    console.log('Connected to MongoDB server', err);
-});
+  mongoose.connection.on('reconnected', () => {
+    console.log('Mongo Connection Reestablished');
+  });
 
-db.on('disconnected', () => {
-    console.log('MongoDB disconnected');
-});
+  mongoose.connection.on('error', (error) => {
+    console.log('MongoDB connection error. Please make sure MongoDB is running: ');
+    console.log(`Mongo Connection ERROR: ${error}`);
+  });
 
-//Export the db connection
-module.exports = db;
+  mongoose.connection.on('close', () => {
+    console.log('Mongo Connection Closed...');
+  });
+
+  process.on('SIGINT', () => {
+    mongoose.connection.close(() => {
+      console.log('MongoDB database connection is disconnected due to app termination...');
+      process.exit(0);
+    });
+  });
+
+  return dbConnection = await mongoose.connect(mongoUrl, {
+    maxPoolSize: 10,
+    maxIdleTimeMS: 10000,
+  })
+    .then((db) => {
+      isConnected = db.connections[0].readyState;
+    });
+};
