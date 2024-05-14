@@ -1,34 +1,40 @@
 const express = require('express');
-const app = express()
-const db = require('./db');
-require('dotenv').config();
-
+const app = express();
 const bodyParser = require('body-parser');
-const MenuItem = require('./models/MenuItem.js')
-
-app.use(bodyParser.json()); //store in req.body
-
-const personRoutes = require('./routes/personRoutes.js')
-const menuRoutes = require('./routes/menuRoutes.js')
-const milkRoutes = require('./routes/milkRoutes.js')
-
-app.get('/', function(req, res) {
-    res.send('Hello World!')
-})
-
-app.get('/sneha', function(req, res) {
-    res.send("Hi I am Sneha");
-})
-
-app.use('/person', personRoutes);
-app.use('/menu', menuRoutes);
-app.use('/milk', milkRoutes);
+const passport = require('./auth.js');
+const { connectToDatabase } = require('./db.js');
+app.use(bodyParser.json());
+app.use(passport.initialize());
 
 const PORT = process.env.PORT || 3000;
 
-app.listen(PORT, ()=> {
-    console.log('Server is running on port 3000');
-})
+connectToDatabase();
+
+const logRequest = (req, res, next) => {
+    console.log(`[${new Date().toLocaleString()}] Request Made to : ${req.originalUrl}`);
+    next();
+};
+app.use(logRequest);
+
+// Routes
+const personRoutes = require('./routes/personRoutes.js');
+const menuRoutes = require('./routes/menuRoutes.js');
+const milkRoutes = require('./routes/milkRoutes.js');
+
+const localAuthMiddleware = passport.authenticate('local', { session: false });
+
+app.get('/', function(req, res) {
+    res.send('Hello World!');
+});
+
+app.use('/person', localAuthMiddleware, personRoutes);
+app.use('/menu', menuRoutes);
+app.use('/milk', milkRoutes);
+
+app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+});
+
 
 
 /*
