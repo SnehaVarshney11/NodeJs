@@ -1,9 +1,9 @@
 const passport = require('passport');
-const LocalStrateg = require('passport-local').Strategy;
+const LocalStrategy = require('passport-local').Strategy;
 const Person = require('./models/Person');
-const bcrypt = require('bcrypt');
+const Menu = require('./models/MenuItem');
 
-passport.use(new LocalStrateg(async (username, password, done) => {
+passport.use(new LocalStrategy(async (username, password, done) => {
     //Authentication Logic
     try{
         //console.log('Recieved Credentials', username, password);
@@ -17,6 +17,20 @@ passport.use(new LocalStrateg(async (username, password, done) => {
         }else {
             return done(null, false, { message: 'Incorrect Password' });
         }
+    }catch(err) {
+        return done(err);
+    }
+}))
+
+passport.use(new LocalStrategy(async (username, password, done) => {
+    try{
+        const user = await Menu.findOne({ username });
+        if(!user) {
+            return done(null, false, { message: 'Invalid username' });
+        }
+
+        const isPassMatch = await user.compareMenuPassword(password);
+
     }catch(err) {
         return done(err);
     }
